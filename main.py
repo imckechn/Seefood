@@ -1,35 +1,34 @@
 import tensorflow as tf
-import tensorflow.keras as keras
+from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 import matplotlib.pyplot as plt
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import numpy as np
 
-train_batch_size = 500
+train_batch_size = 498
 img_height = 512
 img_width = 382
 
 # ------------------- For the training set -------------------
-train_hd_ds = tf.keras.preprocessing.image_dataset_from_directory('./archive/train', image_size=(img_height, img_width), batch_size=train_batch_size)
+
+#train_hd_ds = tf.keras.preprocessing.image_dataset_from_directory(
+#    "archive/train", 
+#    labels='inferred',
+#    image_size=(img_height, img_width), 
+#    batch_size=train_batch_size
+#)
+
+train_path = 'archive/train'
+
+train_hd_ds = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,classes=['hotdog', 'not_hotdog'], batch_size=10)
+
 print(train_hd_ds)
 
-plt.figure(figsize=(10, 10))
-print(train_hd_ds.class_names)
-print(train_hd_ds.take(1))
-
-class_names = train_hd_ds.class_names
-for images, labels in train_hd_ds.take(1):
-    for i in range(32):
-        ax = plt.subplot(6, 6, i + 1)
-        plt.imshow(images[i].numpy().astype("uint8"))
-        plt.title(class_names[labels[i]])
-        plt.axis("off")
-    break
-
-exit()
+print(len(list(train_hd_ds)))
+quit()
 
 train_hd_ds = train_hd_ds.cache().prefetch(buffer_size=train_batch_size)
-
-
 
 #Create the labels, 0 means it's a hotdog, 1 is hotdog 
 train_labels = []
@@ -76,6 +75,12 @@ datagen = tf.keras.preprocessing.image.ImageDataGenerator(
 )
 
 print(train_ds)
+
+train_ds = np.array(train_ds)
+train_labels = np.array(train_labels)
+
+print(len(train_ds))
+print(len(train_labels))
 
 newImages = datagen.flow(train_ds, train_labels, batch_size = train_batch_size)
 

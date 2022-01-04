@@ -5,30 +5,63 @@ from tensorflow.keras.models import Sequential
 import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
+from IPython.display import Image, display
+import pathlib
+import os
+from os.path import join
+import PIL
+
+#Get the size of the images
+image = PIL.Image.open('archive/train/hot_dog/2417.jpg')
+print("Image size = " + str(image.size))
 
 train_batch_size = 498
-img_height = 512
-img_width = 382
+img_height = 384 
+img_width = 512
+
 
 # ------------------- For the training set -------------------
 
-#train_hd_ds = tf.keras.preprocessing.image_dataset_from_directory(
-#    "archive/train", 
-#    labels='inferred',
-#    image_size=(img_height, img_width), 
-#    batch_size=train_batch_size
-#)
-
 train_path = 'archive/train'
+train_path = pathlib.Path('archive/train')
 
-train_hd_ds = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,classes=['hotdog', 'not_hotdog'], batch_size=10)
+#datagen = ImageDataGenerator()
 
-print(train_hd_ds)
+#train_hd_ds = datagen.flow_from_directory('archive/train/', class_mode='binary')
 
-print(len(list(train_hd_ds)))
+train_hd_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    train_path, 
+    labels='inferred',
+    image_size=(img_height, img_width), 
+    batch_size=1
+)
+
+plt.imshow(train_hd_ds.take(1))
+plt.show()
+
+
+print("Done")
 quit()
 
-train_hd_ds = train_hd_ds.cache().prefetch(buffer_size=train_batch_size)
+plt.figure(figsize=(img_height, img_width))
+class_names = train_hd_ds.class_names
+for images, labels in train_hd_ds.take(1):
+    for i in range(32):
+        ax = plt.subplot(6, 6, i + 1)
+        plt.imshow(images[i].numpy().astype("uint8"))
+        plt.title(class_names[labels[i]])
+        plt.axis("off")
+print(train_hd_ds)
+
+
+
+#train_hd_ds = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,classes=['hotdog', 'not_hotdog'], batch_size=10)
+
+#print(train_hd_ds)
+display(Image(train_hd_ds))
+
+
+#train_hd_ds = train_hd_ds.cache().prefetch(buffer_size=train_batch_size)
 
 #Create the labels, 0 means it's a hotdog, 1 is hotdog 
 train_labels = []
@@ -43,8 +76,7 @@ train_ds = train_hd_ds
 
 
 # ------------------- For the Testing set -------------------
-test_hd_ds = tf.keras.preprocessing.image_dataset_from_directory('./archive/test', image_size=(img_height, img_width), batch_size=train_batch_size)
-test_hd_ds = test_hd_ds.cache().prefetch(buffer_size=train_batch_size)
+test_hd_ds = datagen.flow_from_directory('archive/test/', class_mode='binary')
 
 
 #Create the labels, 0 means it's a hotdog, 1 is hotdog 
@@ -57,6 +89,8 @@ for i in range(250):
 
 #Amalgomate them into one testing set
 test_ds = test_hd_ds
+
+print("A")
 
 
 # ------------------- Creating new images from the data set by performing transformations as well as normalize all the data-------------------
@@ -92,8 +126,7 @@ train_batch_size = len(train_ds)
 # ------------------- performing it on the test data -------------------
 test_iterator = datagen(test_ds, test_labels, batchSize = 500)
 
-quit()
-
+print("HERE")
 # ------------------- Trainging the model -------------------
 model = keras.sequential([
     layers.Dense(2, activation="relu", name="l1"),

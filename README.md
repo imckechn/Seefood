@@ -1,4 +1,4 @@
-# No Hot Dog
+# SeeFood (Not Hot Dog)
 
 This is my own version of the SeeFood app from the Silicon Valley TV show by HBO. It identifies if the image contains a hotdog or not. It uses pytorch and torchvision to to perform transfer learning on a pretrained resnet model and then uses the model to predict if the image contains a hotdog or not.
 
